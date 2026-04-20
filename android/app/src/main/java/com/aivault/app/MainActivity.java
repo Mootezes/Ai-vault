@@ -42,41 +42,6 @@ public class MainActivity extends BridgeActivity {
         registerReceiver(notificationReceiver, filter, Context.RECEIVER_EXPORTED);
     }
 
-    // Custom Plugin inside MainActivity to handle permission
-    @CapacitorPlugin(name = "NotificationPermission")
-    public class NotificationPermissionPlugin extends Plugin {
-        @PluginMethod
-        public void checkPermission(PluginCall call) {
-            JSObject ret = new JSObject();
-            ret.put("enabled", isNotificationServiceEnabled());
-            call.resolve(ret);
-        }
-
-        @PluginMethod
-        public void requestPermission(PluginCall call) {
-            if (!isNotificationServiceEnabled()) {
-                Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-                startActivity(intent);
-            }
-            call.resolve();
-        }
-
-        private boolean isNotificationServiceEnabled() {
-            String pkgName = getPackageName();
-            final String flat = Settings.Secure.getString(getContentResolver(), "enabled_notification_listeners");
-            if (!TextUtils.isEmpty(flat)) {
-                final String[] names = flat.split(":");
-                for (String name : names) {
-                    final ComponentName cn = ComponentName.unflattenFromString(name);
-                    if (cn != null && TextUtils.equals(pkgName, cn.getPackageName())) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
